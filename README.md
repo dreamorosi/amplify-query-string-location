@@ -2,6 +2,7 @@
 
 This sample shows demonstrates how to create an interactive map that syncs its state with the page URL. The map layer is provided by Amazon Location Service and the application is built with React and Amplify JS.
 
+https://user-images.githubusercontent.com/7353869/187044201-33211cd8-389c-4b1b-9383-d7cd70e138a1.mp4
 ![Cover Video](https://user-images.githubusercontent.com/7353869/187044201-33211cd8-389c-4b1b-9383-d7cd70e138a1.mp4)
 
 ## What do I need?
