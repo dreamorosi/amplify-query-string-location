@@ -169,7 +169,7 @@ In this sample I decided to [encode the data as base64](https://en.wikipedia.org
 
 If you start clicking on the map you'll see that the application allows you to add markers. When there are two or more markers, the app automatically calculates the route between each pair of points and displays it on the map.
 
-![Map with Route]('./public/2.map.png')
+![Map with Route](./public/2.map.png)
 
 Additionally, it also updates the page url:
 
