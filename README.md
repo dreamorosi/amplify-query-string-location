@@ -2,14 +2,19 @@
 
 This sample shows demonstrates how to create an interactive map that syncs its state with the page URL. The map layer is provided by Amazon Location Service and the application is built with React and Amplify JS.
 
-Click on the video below to see a demo, or play it [from here](https://github.com/dreamorosi/amplify-query-string-location/issues/1):
-![Cover Video](https://user-images.githubusercontent.com/7353869/187044201-33211cd8-389c-4b1b-9383-d7cd70e138a1.mp4)
+<p align="center">
+
+Click on the video below to see a demo, or play it [from here](https://www.youtube.com/watch?v=OudD5AMKDFU):
+
+[![Cover Vide](https://img.youtube.com/vi/OudD5AMKDFU/0.jpg)](https://www.youtube.com/watch?v=OudD5AMKDFU)
+
+</p>
 
 ## What do I need?
 
-- AWS CLI
-- Node.js & npm
+- Node.js (v16.x or newer) & npm (v8.x or newer)
 - An AWS Account and credentials
+- [AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) (optional)
 
 > **Warning**
 > While all the resources used in this sample have a pay-as-you-go model, please make sure to delete all the resources created to avoid incurring in extra costs. See the "Cleanup" section below for some pointers.
