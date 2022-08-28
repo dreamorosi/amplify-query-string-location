@@ -1,4 +1,4 @@
-import { Stack, StackProps } from "aws-cdk-lib";
+import { CfnOutput, Stack, StackProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { AuthConstruct } from "./auth-construct";
 import { LocationConstruct } from "./location-construct";
@@ -14,6 +14,11 @@ export class AmplifyQueryStringLocationStack extends Stack {
       mapName,
       routeCalculatorName,
       placeIndexName,
+    });
+
+    new CfnOutput(this, "AWSRegion", {
+      exportName: `${Stack.of(this).stackName}-region`,
+      value: Stack.of(this).region,
     });
   }
 }
