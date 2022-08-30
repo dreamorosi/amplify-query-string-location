@@ -2,6 +2,7 @@ import {
   LocationClient,
   CalculateRouteCommand,
   CalculateRouteCommandOutput,
+  CalculateRouteCommandInput,
 } from "@aws-sdk/client-location";
 import { ViewState, LngLat, LayerProps, MapRef } from "react-map-gl";
 import { featureCollection, lineString } from "@turf/helpers";
@@ -160,26 +161,33 @@ const getRoutePath = async (
 ): Promise<RoutePathResult> => {
   const client = await getLocationClient(region);
 
-  const commandInput = {
+  const commandInput: Partial<CalculateRouteCommandInput> = {
     CalculatorName: calculatorName,
     TravelMode: "Car",
     IncludeLegGeometry: true,
   };
 
-  const commands: Promise<any>[] = [];
-  markers.forEach((marker, idx) => {
-    if (idx === markers.length - 1) return;
+  const departureMarker = markers[0];
+  commandInput.DeparturePosition = [departureMarker.lng, departureMarker.lat];
+  const destinationMarker = markers[markers.length - 1];
+  commandInput.DestinationPosition = [
+    destinationMarker.lng,
+    destinationMarker.lat,
+  ];
 
-    return commands.push(
-      client.send(
-        new CalculateRouteCommand({
-          ...commandInput,
-          DeparturePosition: [marker.lng, marker.lat],
-          DestinationPosition: [markers[idx + 1].lng, markers[idx + 1].lat],
-        })
-      )
-    );
-  });
+  if (markers.length > 2) {
+    const waypoints = markers.slice(1, -1);
+    commandInput.WaypointPositions = waypoints.map(({ lng, lat }) => [
+      lng,
+      lat,
+    ]);
+    console.log(waypoints);
+  }
+
+  const result = await client.send(
+    new CalculateRouteCommand(commandInput as CalculateRouteCommandInput)
+  );
+
   // This command generates an encoded string of each markers, seaparated by a `$` symbol
   // for instance, two markers would be:
   // -122.97605616912185,49.22455679584917$-123.04746730193418,49.25055978986748
@@ -187,29 +195,21 @@ const getRoutePath = async (
     markers.map((marker) => `${marker.lng},${marker.lat}`).join("$")
   );
 
-  const results: CalculateRouteCommandOutput[] = await Promise.all(commands);
-
-  const distance = results.reduce(function (distance, obj) {
-    return distance + (obj.Summary?.Distance || 0);
-  }, 0);
-  const duration = results.reduce(function (duration, obj) {
-    return duration + (obj.Summary?.DurationSeconds || 0);
-  }, 0);
+  if (!result.Legs)
+    throw new Error("Unable to load intinerary geometry for legs");
 
   const routeFeatureCollection = featureCollection([
-    ...results.map((result) => {
-      const { Legs: legs } = result;
-      if (legs === undefined || legs.length === 0)
-        throw new Error("No route found");
-      return lineString(legs[0].Geometry?.LineString as Position[]);
+    ...result.Legs.map((leg) => {
+      return lineString(leg.Geometry?.LineString as Position[]);
     }),
   ]);
 
   const combineFeauterCollection = combine(routeFeatureCollection);
+  console.log(result.Legs);
 
   return {
-    distance,
-    duration,
+    distance: result.Summary?.Distance || 0,
+    duration: result.Summary?.DurationSeconds || 0,
     route: combineFeauterCollection as RoutePath,
     bbox: bbox(combineFeauterCollection),
     base64: toBase64(encodedMarkersString),
@@ -220,7 +220,7 @@ const getRoutePath = async (
 // and centers the viewport of the map to the provided bounding
 // box with some padding on each side
 const centerBbox = (map: MapRef | null, bbox: BBox) => {
-  if (bbox.every((x: number) => x !== Math.abs(Infinity))) {
+  if (bbox && bbox.every((x: number) => x !== Math.abs(Infinity))) {
     map?.fitBounds(
       [
         [bbox[0], bbox[1]],
